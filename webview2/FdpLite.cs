@@ -16,9 +16,9 @@ using System.Reflection;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-[assembly: AssemblyVersion("1.0.8.0")]
-[assembly: AssemblyFileVersion("1.0.8.0")]
-[assembly: AssemblyTitle("FDP 极简版 1.0.8")]
+[assembly: AssemblyVersion("1.0.9.0")]
+[assembly: AssemblyFileVersion("1.0.9.0")]
+[assembly: AssemblyTitle("FDP 极简版 1.0.9")]
 [assembly: AssemblyProduct("Folio Dot Pig")]
 
 class FdpLite : Form {
@@ -27,6 +27,7 @@ class FdpLite : Form {
   [DllImport("user32.dll")] static extern bool ReleaseCapture();
   [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
   [DllImport("shlwapi.dll", CharSet=CharSet.Unicode)] static extern int AssocQueryString(uint flags,uint str,string assoc,string extra,StringBuilder result,ref uint length);
+  [DllImport("shell32.dll", CharSet=CharSet.Unicode)] static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
   [DllImport("shell32.dll")] static extern void SHChangeNotify(uint eventId,uint flags,IntPtr item1,IntPtr item2);
   static void SetAssociationKey(string key,string name,object value){using(var sub=Registry.CurrentUser.CreateSubKey(key)){if(sub==null)throw new IOException("无法注册默认应用");sub.SetValue(name,value,RegistryValueKind.String);}}
   bool IsDefaultPdf(){try{uint length=0;AssocQueryString(0,2,".pdf",null,null,ref length);if(length==0||length>32768)return false;var result=new StringBuilder((int)length);return AssocQueryString(0,2,".pdf",null,result,ref length)==0&&String.Equals(Path.GetFullPath(result.ToString()),Path.GetFullPath(Application.ExecutablePath),StringComparison.OrdinalIgnoreCase);}catch{return false;}}
@@ -61,7 +62,7 @@ class FdpLite : Form {
   }
   void SendRecent() { Send(new {type="recent-list",items=ReadRecent().Take(5).Select(x=>new {x.id,name=Path.GetFileName(x.path),location=Path.GetDirectoryName(x.path)}).ToArray()}); }
   void ChooseFile(string path) { string token=Guid.NewGuid().ToString("N"); documents[token]=path; documentHashes[token]=FileHash(path); Send(new {type="opened",name=Path.GetFileName(path),url=documentSite+token,token=token}); }
-  FdpLite() { Text = "FDP 极简版"; Width = 1280; Height = 850; MinimumSize = new System.Drawing.Size(900,650); FormBorderStyle = FormBorderStyle.None; Padding = new Padding(5); BackColor = System.Drawing.Color.FromArgb(224,238,238); var ico = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "fdp-app.ico"); if (File.Exists(ico)) Icon = new System.Drawing.Icon(ico); view.Dock = DockStyle.Fill; Controls.Add(view); Shown += Start; ListenForFiles(); Resize += delegate { Padding = new Padding(WindowState == FormWindowState.Maximized ? 0 : 5); if (view.CoreWebView2 != null) Send(new { type="window-state", maximized=WindowState == FormWindowState.Maximized }); }; MouseMove += ResizeCursor; MouseDown += ResizeStart; }
+  FdpLite() { Text = "FDP 极简版"; Width = 1280; Height = 850; MinimumSize = new System.Drawing.Size(900,650); FormBorderStyle = FormBorderStyle.None; Padding = new Padding(5); BackColor = System.Drawing.Color.FromArgb(224,238,238); var ico = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "fdp-app.ico"); if (File.Exists(ico)) Icon = new System.Drawing.Icon(ico); else Icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); view.Dock = DockStyle.Fill; Controls.Add(view); Shown += Start; ListenForFiles(); Resize += delegate { Padding = new Padding(WindowState == FormWindowState.Maximized ? 0 : 5); if (view.CoreWebView2 != null) Send(new { type="window-state", maximized=WindowState == FormWindowState.Maximized }); }; MouseMove += ResizeCursor; MouseDown += ResizeStart; }
   int ResizeEdge(System.Drawing.Point p) { if (WindowState == FormWindowState.Maximized) return 0; bool l=p.X<6, r=p.X>=ClientSize.Width-6, t=p.Y<6, b=p.Y>=ClientSize.Height-6; if(l&&t)return 4; if(r&&t)return 5; if(l&&b)return 7; if(r&&b)return 8; if(l)return 1; if(r)return 2; if(t)return 3; if(b)return 6; return 0; }
   void ResizeCursor(object sender, MouseEventArgs e) { int edge=ResizeEdge(e.Location); Cursor = edge==1||edge==2 ? Cursors.SizeWE : edge==3||edge==6 ? Cursors.SizeNS : edge==4||edge==8 ? Cursors.SizeNWSE : edge==5||edge==7 ? Cursors.SizeNESW : Cursors.Default; }
   void ResizeStart(object sender, MouseEventArgs e) { int edge=ResizeEdge(e.Location); if(e.Button==MouseButtons.Left && edge!=0){ReleaseCapture();SendMessage(Handle,WM_SYSCOMMAND,(IntPtr)(SC_SIZE+edge),IntPtr.Zero);} }
@@ -181,7 +182,7 @@ class FdpLite : Form {
   }
   protected override void OnFormClosing(FormClosingEventArgs e) { if(e.CloseReason==CloseReason.UserClosing && !closingApproved && view.CoreWebView2!=null){e.Cancel=true;Send(new {type="request-close"});return;}base.OnFormClosing(e); }
   protected override void OnFormClosed(FormClosedEventArgs e) { CancelTransfer();base.OnFormClosed(e); }
-  [STAThread] static void Main() { bool first;using(var mutex=new Mutex(true,InstanceName,out first)) { if(!first) { try { using(var pipe=new NamedPipeClientStream(".",InstanceName,PipeDirection.Out)) { pipe.Connect(10000);using(var writer=new StreamWriter(pipe,Encoding.UTF8)){writer.WriteLine(PdfArgument(Environment.GetCommandLineArgs().Skip(1).ToArray())??"");} } } catch(Exception ex) { MessageBox.Show("无法连接已打开的 FDP 窗口，请重试。\n"+ex.Message,"FDP",MessageBoxButtons.OK,MessageBoxIcon.Error); } return; } Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false); Application.Run(new FdpLite()); } }
+  [STAThread] static void Main() { bool first;using(var mutex=new Mutex(true,InstanceName,out first)) { if(!first) { try { using(var pipe=new NamedPipeClientStream(".",InstanceName,PipeDirection.Out)) { pipe.Connect(10000);using(var writer=new StreamWriter(pipe,Encoding.UTF8)){writer.WriteLine(PdfArgument(Environment.GetCommandLineArgs().Skip(1).ToArray())??"");} } } catch(Exception ex) { MessageBox.Show("无法连接已打开的 FDP 窗口，请重试。\n"+ex.Message,"FDP",MessageBoxButtons.OK,MessageBoxIcon.Error); } return; } SetCurrentProcessExplicitAppUserModelID("FolioDotPig.FDPLite"); Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false); Application.Run(new FdpLite()); } }
 }
 
 
