@@ -6,7 +6,7 @@ FDP Lite 是一款面向 Windows 的轻量 PDF 阅读与编辑工具，使用 We
 
 ## 下载和使用
 
-发布后可在本仓库的 Releases 页面下载便携版压缩包，解压到固定目录，运行 `FDP-Lite.exe`。需要 Windows x64、Microsoft Edge WebView2 Runtime 和 .NET Framework 4.7.2 或更高版本。当前尚未发布公开版本。
+发布后可在本仓库的 Releases 页面下载便携版压缩包，解压到固定目录，运行 `FDP-Lite.exe`。需要 Windows x64、Microsoft Edge WebView2 Runtime 和 .NET Framework 4.7.2 或更高版本。当前版本处于试用阶段。
 
 ## 构建
 
