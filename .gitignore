@@ -1,0 +1,7 @@
+dist/
+output/
+*.zip
+*.tmp
+*.user
+.vs/
+node_modules/
