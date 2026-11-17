@@ -3,8 +3,8 @@
 本表依据当前源码目录中的文件整理；公开发布前还需核对完整依赖链、来源和分发条件。
 
 - PDF.js 6.2.108：Apache License 2.0，见 `vendor/pdfjs-LICENSE`。
-- pdf-lib（原项目开发依赖标注 1.17.1）：MIT，见 `vendor/pdf-lib-LICENSE.md`；打包文件版本仍需进一步核对。
-- pdf-fontkit 1.8.9：MIT，见 `vendor/pdf-fontkit-LICENSE.txt` 和 `vendor/pdf-fontkit-package.json`；其打包依赖及声明需进一步核对。
+- pdf-lib 1.17.1：MIT，见 `vendor/pdf-lib-LICENSE.md`。项目中的 `vendor/pdf-lib.min.js` 与 npm 发布的 1.17.1 文件在统一换行符后逐字节一致。
+- pdf-fontkit 1.8.9：项目中的 `vendor/pdf-fontkit.min.js` 与 npm 发布的 1.8.9 UMD 文件在统一换行符后逐字节一致。该包声明 MIT，见 `vendor/pdf-fontkit-LICENSE.txt` 和 `vendor/pdf-fontkit-package.json`；上游发布包未附独立 LICENSE，现有版权声明及其打包依赖的许可仍需进一步核对。
 - PDF.js 图像解码资源及相关许可证：见 `vendor/wasm/LICENSE_*`。
 - PDF.js CMap 资源：见 `vendor/cmaps/LICENSE`。
 - PDF.js 标准字体：分别见 `vendor/standard_fonts/LICENSE_FOXIT` 和 `LICENSE_LIBERATION`。
