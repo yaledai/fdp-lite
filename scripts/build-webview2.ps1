@@ -14,10 +14,10 @@ if($LASTEXITCODE -ne 0){throw 'Compile failed'}
 Copy-Item -Path @("$lib\Microsoft.Web.WebView2.Core.dll","$lib\Microsoft.Web.WebView2.WinForms.dll",$loader,"$project\assets\fdp-app.ico","$project\assets\fdp-document.ico") -Destination $out
 Copy-Item "$project\webview2\index.html","$project\webview2\lite.mjs","$project\webview2\lite.css","$project\webview2\lite-annotations.mjs","$project\webview2\text-annotations-system.mjs","$project\styles.css","$project\text-annotations.mjs","$project\highlight-annotations.mjs","$project\note-annotations.mjs" -Destination "$out\site"
 Copy-Item "$project\vendor\pdfjs\pdf.mjs","$project\vendor\pdfjs\pdf.worker.mjs" -Destination "$out\site\vendor\pdfjs"
-Copy-Item "$project\vendor\cmaps","$project\vendor\standard_fonts" -Destination "$out\site\vendor" -Recurse
+Copy-Item "$project\vendor\cmaps","$project\vendor\standard_fonts","$project\vendor\wasm" -Destination "$out\site\vendor" -Recurse
 Copy-Item "$project\vendor\pdfjs-LICENSE","$project\vendor\pdf-lib.min.js","$project\vendor\pdf-lib-LICENSE.md","$project\vendor\pdf-fontkit.min.js","$project\vendor\pdf-fontkit-LICENSE.txt" -Destination "$out\site\vendor"
 New-Item -ItemType Directory -Path "$out\site\assets" | Out-Null
-Copy-Item "$project\assets\fdp-pig-line.png" -Destination "$out\site\assets"
+Copy-Item "$project\assets\fdp-pig-ui.png" -Destination "$out\site\assets\fdp-pig-line.png"
 Copy-Item "$sdk\LICENSE.txt","$sdk\NOTICE.txt" -Destination $out
 Write-Host "Built $out"
 
