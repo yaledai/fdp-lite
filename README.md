@@ -16,7 +16,7 @@ FDP Lite 是一款面向 Windows 的轻量 PDF 阅读与编辑工具，使用 We
 ./scripts/build-webview2.ps1 -SdkPath <SDK目录> -OutputPath <新输出目录>
 ```
 
-输出目录必须不存在。脚本使用 Windows .NET Framework 的 C# 编译器；源码中的 WebView2 程序、界面和 PDF 依赖均在本仓库中。SDK 版本需与实际发布构建使用的版本一致；目前尚未固定或验证可复现构建环境。
+输出目录必须不存在。构建完成后，可运行 `./scripts/package-webview2.ps1 -BuildPath <构建目录> -ZipPath <输出zip>`，脚本会检查压缩包不超过 5,000,000 字节。脚本使用 Windows .NET Framework 的 C# 编译器；源码中的 WebView2 程序、界面和 PDF 依赖均在本仓库中。SDK 版本需与实际发布构建使用的版本一致；目前尚未固定或验证可复现构建环境。
 
 ## 参与
 
