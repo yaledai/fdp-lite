@@ -1,0 +1,40 @@
+name: Windows build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify WebView2 SDK
+        shell: pwsh
+        run: |
+          $uri = 'https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3537.50/microsoft.web.webview2.1.0.3537.50.nupkg'
+          $package = Join-Path $env:RUNNER_TEMP 'webview2.nupkg'
+          Invoke-WebRequest -Uri $uri -OutFile $package
+          $expected = '5EA526BBD728ADDA0DA4D31219267E96460494A427E4894C4E09D9F320F4B9AA'
+          if ((Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash -ne $expected) { throw 'WebView2 SDK hash mismatch.' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::ExtractToDirectory($package, (Join-Path $env:RUNNER_TEMP 'webview2-sdk'))
+      - name: Build and check package size
+        shell: pwsh
+        run: |
+          $sdk = Join-Path $env:RUNNER_TEMP 'webview2-sdk'
+          $build = Join-Path $env:RUNNER_TEMP 'fdp-lite-build'
+          $zip = Join-Path $env:RUNNER_TEMP 'FDP-Lite-test.zip'
+          ./scripts/build-webview2.ps1 -SdkPath $sdk -OutputPath $build
+          ./scripts/package-webview2.ps1 -BuildPath $build -ZipPath $zip -MaxBytes 5000000
+      - name: Upload test package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FDP-Lite-test
+          path: ${{ runner.temp }}/FDP-Lite-test.zip
+          if-no-files-found: error
+          retention-days: 7
