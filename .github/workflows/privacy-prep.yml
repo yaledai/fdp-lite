@@ -32,4 +32,8 @@ jobs:
             echo 'Unexpected personal email remains in rewritten history.'
             exit 1
           fi
-          git push origin HEAD:refs/heads/codex/privacy-clean
+          git config user.name 'yaledai'
+          git config user.email '20395513+yaledai@users.noreply.github.com'
+          git rm .github/workflows/privacy-prep.yml
+          git commit -m 'Remove temporary privacy preparation workflow'
+          git push origin HEAD:refs/heads/codex/privacy-release
